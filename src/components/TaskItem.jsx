@@ -10,13 +10,13 @@ const TaskItem = ({ task }) => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleStatusToggle = () => {
-    updateTask(task.id, { ...task, completed: !task.completed });
+    updateTask(task._id, { ...task, completed: !task.completed });
   };
 
   const handleDelete = () => {
     setIsDeleting(true);
     setTimeout(() => {
-      deleteTask(task.id);
+      deleteTask(task._id);
     }, 300);
   };
 
@@ -66,7 +66,7 @@ const TaskItem = ({ task }) => {
                 <FaCheck />
               </button>
               <Link
-                to={`/edit-task/${task.id}`}
+                to={`/edit-task/${task._id}`}
                 className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300"
               >
                 <FaEdit />

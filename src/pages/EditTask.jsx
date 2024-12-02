@@ -6,7 +6,7 @@ import { useTaskContext } from "../contexts/TaskContext";
 const EditTask = () => {
   const { id } = useParams();
   const { tasks } = useTaskContext();
-  const task = tasks.find((t) => t.id === parseInt(id));
+  const task = tasks.find((t) => t._id === id);
 
   if (!task) {
     return <div className="text-center py-4">Task not found</div>;

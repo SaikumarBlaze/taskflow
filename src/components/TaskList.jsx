@@ -11,9 +11,13 @@ const TaskList = () => {
 
   return (
     <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-      {tasks.map((task) => (
-        <TaskItem key={task.id} task={task} />
-      ))}
+      {tasks.length === 0 && (
+        <span className="text-white">
+          Notes you add appear here
+        </span>
+      )}
+      {tasks.length !== 0 &&
+        tasks.map((task) => <TaskItem key={task._id} task={task} />)}
     </div>
   );
 };

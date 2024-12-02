@@ -1,21 +1,25 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
-import { useAuth } from "../contexts/AuthContext";
 import { FaTasks, FaPlus, FaMoon, FaSun, FaSignOutAlt } from "react-icons/fa";
 
-const Navbar = () => {
+const Navbar = (props) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
-  const { logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
-    logout();
-    navigate("/login");
+    // Remove authentication data to log the user out
+    localStorage.removeItem("taskToken");
+    localStorage.removeItem("taskUserName");
+    localStorage.removeItem("taskUserEmail");
+
+    props.setToken(false); // Update the token state to false
+    navigate("/login"); // Redirect to login page
+    alert("success", "Successfully logged out!");
   };
 
   const toggleDropdown = () => {

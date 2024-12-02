@@ -7,7 +7,9 @@ const TaskForm = ({ task, isEditing }) => {
   const { addTask, updateTask } = useTaskContext();
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
-  const [dueDate, setDueDate] = useState(task?.dueDate || "");
+  const [dueDate, setDueDate] = useState(
+    task?.due_date ? new Date(task.due_date).toISOString().split("T")[0] : ""
+  );
   const [status, setStatus] = useState(task?.completed || false);
   const [errors, setErrors] = useState({});
 
@@ -34,7 +36,7 @@ const TaskForm = ({ task, isEditing }) => {
     const taskData = { title, description, dueDate, completed: status };
 
     if (isEditing) {
-      await updateTask(task.id, taskData);
+      await updateTask(task._id, taskData);
     } else {
       await addTask(taskData);
     }

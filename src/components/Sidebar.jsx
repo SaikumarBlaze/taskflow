@@ -1,20 +1,27 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
-import { useAuth } from "../contexts/AuthContext";
 import { FaTasks, FaPlus, FaMoon, FaSun, FaSignOutAlt } from "react-icons/fa";
+import { useTaskContext } from "../contexts/TaskContext";
 
-const Sidebar = () => {
+const Sidebar = (props) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useTheme();
-  const { logout } = useAuth();
+  const { setTasks } = useTaskContext();
 
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
-    logout();
-    navigate("/login");
+    // Remove authentication data to log the user out
+    localStorage.removeItem("taskToken");
+    localStorage.removeItem("taskUserName");
+    localStorage.removeItem("taskUserEmail");
+
+    props.setToken(false); // Update the token state to false
+    setTasks([]); // Clear the tasks
+    navigate("/login"); // Redirect to login page
+    alert("Successfully logged out!");
   };
 
   return (

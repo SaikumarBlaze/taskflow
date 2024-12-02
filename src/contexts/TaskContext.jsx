@@ -1,7 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
 
-const API_BASE_URL = "https://jsonplaceholder.typicode.com";
+// const API_BASE_URL = "https://jsonplaceholder.typicode.com";
+const API_BASE_URL = "http://localhost:5000/api";
 
 const TaskContext = createContext();
 
@@ -16,20 +17,35 @@ export const TaskProvider = ({ children }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    const token = localStorage.getItem("taskToken");
+    if (token) {
+      fetchTasks();
+    } else {
+      setTasks([]); // Clear tasks if no token is found
+    }
+    // eslint-disable-next-line
+  }, [localStorage.getItem("taskToken")]);
 
   useEffect(() => {
     filterAndSearchTasks();
+    // eslint-disable-next-line
   }, [tasks, filter, searchTerm]);
 
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/todos`);
+      const response = await axios.get(`${API_BASE_URL}/tasks`, {
+        headers: {
+          "auth-token": localStorage.getItem("taskToken"), // Authorization token for secured access
+        },
+      });
       setTasks(
-        response.data.slice(0, 10).map((task) => ({ ...task, order: task.id }))
-      ); // Add order property
+        response.data.tasks.map((task) => ({
+          ...task,
+          completed: task.status === "Pending" ? false : true,
+          order: task._id,
+        }))
+      ); // Add completed for filtering and order property
     } catch (err) {
       setError("Failed to fetch tasks. Please try again later.");
     } finally {
@@ -57,22 +73,65 @@ export const TaskProvider = ({ children }) => {
 
   const addTask = async (task) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/todos`, task);
-      const newTask = { ...response.data, order: tasks.length + 1 };
-      setTasks([...tasks, newTask]);
-    } catch (err) {
-      setError("Failed to add task. Please try again.");
+      // Send POST request with Axios
+      const response = await axios.post(
+        `${API_BASE_URL}/tasks`,
+        {
+          title: task.title,
+          description: task.description,
+          due_date: task.dueDate,
+          status: task.completed ? "Completed" : "Pending",
+        }, // Request body
+        {
+          headers: {
+            "Content-Type": "application/json", // Inform backend of JSON content
+            "auth-token": localStorage.getItem("taskToken"), // Authorization token
+          },
+        }
+      );
+
+      const newTask = { ...response.data.task, order: tasks.length + 1 };
+      setTasks((prevTasks) => [...prevTasks, newTask]);
+    } catch (error) {
+      // Handle errors
+      console.error("Failed to add task:", error.message);
     }
   };
 
   const updateTask = async (id, updatedTask) => {
     try {
-      await axios.put(`${API_BASE_URL}/todos/${id}`, updatedTask);
-      setTasks(
-        tasks.map((task) =>
-          task.id === id ? { ...task, ...updatedTask } : task
-        )
+      await axios.put(
+        `${API_BASE_URL}/tasks/${id}`,
+        {
+          title: updatedTask.title,
+          description: updatedTask.description,
+          due_date: updatedTask.dueDate,
+          status: updatedTask.completed ? "Completed" : "Pending",
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": localStorage.getItem("taskToken"),
+          },
+        }
       );
+
+      fetchTasks();
+
+      // Update the tasks state using a functional update
+      // setTasks((prevTasks) =>
+      //   prevTasks.map((task) =>
+      //     task._id === id
+      //       ? {
+      //           ...task,
+      //           title: updatedData.title,
+      //           description: updatedData.description,
+      //           due_date: updatedData.due_date,
+      //           status: updatedData.status,
+      //         }
+      //       : task
+      //   )
+      // );
     } catch (err) {
       setError("Failed to update task. Please try again.");
     }
@@ -80,8 +139,13 @@ export const TaskProvider = ({ children }) => {
 
   const deleteTask = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/todos/${id}`);
-      setTasks(tasks.filter((task) => task.id !== id));
+      await axios.delete(`${API_BASE_URL}/tasks/${id}`, {
+        headers: {
+          "Content-Type": "application/json", // Inform backend of JSON content
+          "auth-token": localStorage.getItem("taskToken"), // Authorization token
+        },
+      });
+      setTasks(tasks.filter((task) => task._id !== id));
     } catch (err) {
       setError("Failed to delete task. Please try again.");
     }
@@ -104,6 +168,7 @@ export const TaskProvider = ({ children }) => {
     <TaskContext.Provider
       value={{
         tasks: filteredTasks,
+        setTasks,
         loading,
         error,
         addTask,
