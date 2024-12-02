@@ -1,30 +1,59 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { TaskProvider } from "./contexts/TaskContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Dashboard from "./pages/Dashboard";
 import CreateTask from "./pages/CreateTask";
 import EditTask from "./pages/EditTask";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/Sidebar";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import Login from "./components/Login";
+import Navbar from "./components/Navbar";
+
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function App() {
   return (
     <Router>
-      <ThemeProvider>
-        <TaskProvider>
-          <div className="flex h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-            <Sidebar />
-            <main className="flex-1 overflow-x-hidden overflow-y-auto">
+      <AuthProvider>
+        <ThemeProvider>
+          <TaskProvider>
+            <div className="flex h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/create-task" element={<CreateTask />} />
-                <Route path="/edit-task/:id" element={<EditTask />} />
-                <Route path="*" element={<NotFound />} />
+                <Route exact path="/login" element={<Login />} />
+                <Route
+                  path="*"
+                  element={
+                    <ProtectedRoute>
+                      <Navbar />
+                      <Sidebar />
+                      <main className="flex-1 overflow-x-hidden overflow-y-auto">
+                        <Routes>
+                          <Route exact path="/" element={<Dashboard />} />
+                          <Route exact path="/create-task" element={<CreateTask />} />
+                          <Route exact path="/edit-task/:id" element={<EditTask />} />
+                          <Route exact path="*" element={<NotFound />} />
+                        </Routes>
+                      </main>
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
-            </main>
-          </div>
-        </TaskProvider>
-      </ThemeProvider>
+            </div>
+          </TaskProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </Router>
   );
 }

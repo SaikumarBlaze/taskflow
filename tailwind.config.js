@@ -1,8 +1,12 @@
 export default {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
-  darkMode: "media", // or 'class'
+  darkMode: "class",
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        customBlue: 'rgb(37 52 73 / 34%)',
+      },
+    },
   },
   plugins: [],
 };

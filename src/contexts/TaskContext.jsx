@@ -9,18 +9,27 @@ export const useTaskContext = () => useContext(TaskContext);
 
 export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchTasks();
   }, []);
 
+  useEffect(() => {
+    filterAndSearchTasks();
+  }, [tasks, filter, searchTerm]);
+
   const fetchTasks = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_BASE_URL}/todos`);
-      setTasks(response.data.slice(0, 10)); // Limit to 10 tasks for demo
+      setTasks(
+        response.data.slice(0, 10).map((task) => ({ ...task, order: task.id }))
+      ); // Add order property
     } catch (err) {
       setError("Failed to fetch tasks. Please try again later.");
     } finally {
@@ -28,10 +37,29 @@ export const TaskProvider = ({ children }) => {
     }
   };
 
+  const filterAndSearchTasks = () => {
+    let result = tasks;
+
+    if (filter !== "all") {
+      result = result.filter((task) =>
+        filter === "completed" ? task.completed : !task.completed
+      );
+    }
+
+    if (searchTerm) {
+      result = result.filter((task) =>
+        task.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    setFilteredTasks(result);
+  };
+
   const addTask = async (task) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/todos`, task);
-      setTasks([...tasks, response.data]);
+      const newTask = { ...response.data, order: tasks.length + 1 };
+      setTasks([...tasks, newTask]);
     } catch (err) {
       setError("Failed to add task. Please try again.");
     }
@@ -59,9 +87,32 @@ export const TaskProvider = ({ children }) => {
     }
   };
 
+  const reorderTasks = (startIndex, endIndex) => {
+    const result = Array.from(tasks);
+    const [reorderedItem] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, reorderedItem);
+
+    const updatedTasks = result.map((task, index) => ({
+      ...task,
+      order: index + 1,
+    }));
+
+    setTasks(updatedTasks);
+  };
+
   return (
     <TaskContext.Provider
-      value={{ tasks, loading, error, addTask, updateTask, deleteTask }}
+      value={{
+        tasks: filteredTasks,
+        loading,
+        error,
+        addTask,
+        updateTask,
+        deleteTask,
+        setFilter,
+        setSearchTerm,
+        reorderTasks,
+      }}
     >
       {children}
     </TaskContext.Provider>
