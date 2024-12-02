@@ -30,30 +30,36 @@ To get a local copy up and running, follow these steps:
 
 1. Clone the repo
 
-- git clone https://github.com/yourusername/skywrite.git
+- git clone https://github.com/yourusername/taskflow.git
+- cd taskflow
 
-2. Navigate to the task-management-app directory
+2. Install the required packages in the same root directory:
 
-- Install the required packages - "npm install"
+- npm install
 
-3. Create a .env file in this directory and add your backend api url
+3. Set up Tailwind CSS in the same root directory:
+
+- npx tailwindcss init -p
+
+4. Create a .env file in the same root directory and add your backend api url
 
 - REACT_APP_API_URL = http://localhost:5000
 
-4. Navigate to the backend directory
+5. Navigate to the backend directory
 
 - cd ../backend
 - Install the required packages - npm install
 
-5. Create a .env file in the backend directory and add your MongoDB connection string:
+5. Create a .env file in the backend directory and add your MongoDB connection string and jwt secret:
 
 - MONGODB_URI=your_mongodb_connection_string
+- JWT_SECRET=your_jwt_secret
 
 5. Start the backend server
 
 - node ./index.js
 
-6. Start the frontend server
+6. Navigate to root directory and Start the development server:
 
 - cd ..
 - npm start
