@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import fetchUser from "../middlewares/fetchuser.js";
 import dotenv from "dotenv";
 
-dotenv.config(); 
+dotenv.config();
 
 const router = express.Router();
 const secret = process.env.JWT_SECRET;
@@ -258,5 +258,16 @@ router.post(
     }
   }
 );
+
+router.get("/ping", async (req, res) => {
+  try {
+    res.status(200).json({
+      message:
+        "Keeping the server awake by preventing it from going inactive using UptimeRobot!",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error!", error });
+  }
+});
 
 export default router;

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TaskProvider } from "./contexts/TaskContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -13,9 +13,18 @@ import Login from "./components/Login";
 import VerifyEmail from "./components/VerifyEmail";
 import ResetPassword from "./components/ResetPassword";
 import Navbar from "./components/Navbar";
+import keepBackendAlive from "./utils/keepAlive";
 
 function App() {
   const [token, setToken] = useState(false);
+
+  useEffect(() => {
+    const backendURL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+    const intervalId = keepBackendAlive(backendURL);
+
+    // Cleanup function to clear the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <Router>
