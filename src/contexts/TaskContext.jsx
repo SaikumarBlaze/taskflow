@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const TaskContext = createContext();
 
@@ -33,7 +33,7 @@ export const TaskProvider = ({ children }) => {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/tasks`, {
+      const response = await axios.get(`${API_BASE_URL}/api/tasks`, {
         headers: {
           "auth-token": localStorage.getItem("taskToken"), // Authorization token for secured access
         },
@@ -74,7 +74,7 @@ export const TaskProvider = ({ children }) => {
     try {
       // Send POST request with Axios
       const response = await axios.post(
-        `${API_BASE_URL}/tasks`,
+        `${API_BASE_URL}/api/tasks`,
         {
           title: task.title,
           description: task.description,
@@ -100,7 +100,7 @@ export const TaskProvider = ({ children }) => {
   const updateTask = async (id, updatedTask) => {
     try {
       await axios.put(
-        `${API_BASE_URL}/tasks/${id}`,
+        `${API_BASE_URL}/api/tasks/${id}`,
         {
           title: updatedTask.title,
           description: updatedTask.description,
@@ -138,7 +138,7 @@ export const TaskProvider = ({ children }) => {
 
   const deleteTask = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/tasks/${id}`, {
+      await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
         headers: {
           "Content-Type": "application/json", // Inform backend of JSON content
           "auth-token": localStorage.getItem("taskToken"), // Authorization token
